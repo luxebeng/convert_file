@@ -10,16 +10,6 @@ import os
 from pathlib import Path
 
 def process_cuda_arch_blocks(content, is_device=True):
-    """
-    Process __CUDA_ARCH__ blocks in the content.
-
-    Args:
-        content: Source file content
-        is_device: True for device version, False for host version
-
-    Returns:
-        Processed content
-    """
     # Pattern to match #ifdef __CUDA_ARCH__ blocks
     pattern = r'#ifdef __CUDA_ARCH__\s*\n(.*?)#endif'
 
@@ -34,6 +24,14 @@ def process_cuda_arch_blocks(content, is_device=True):
 
     # Replace all __CUDA_ARCH__ blocks
     processed_content = re.sub(pattern, replace_block, content, flags=re.DOTALL)
+
+    # Process __global__ keywords
+    if is_device:
+        # For device version, replace __global__ with __device__
+        processed_content = re.sub(r'__global__\s+', '__device__ ', processed_content)
+    else:
+        # For host version, remove __global__ completely
+        processed_content = re.sub(r'__global__\s+', '', processed_content)
 
     return processed_content
 
